@@ -1,20 +1,59 @@
 import Link from "next/link";
 import { getPosts } from "./data";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 export default async function Page() {
   const posts = await getPosts();
+
   return (
-    <div>
-      <h1>記事一覧</h1>
-      <ul>
+    <>
+      <h1 className="font-bold text-xl mb-6">記事一覧</h1>
+
+      <div className="grid grid-cols-4 gap-4">
         {posts.map((post) => (
-          <li key={post.id}>
-            <Link href={`/posts/${post.id}`}>
-              <h2>{post.title.rendered}</h2>
-            </Link>
-          </li>
+          <Card key={post.id} className="relative">
+            <CardHeader>
+              <CardTitle>
+                <Link href={`/posts/${post.id}`}>
+                  {post.title.rendered}
+                  <span className="absolute inset-0"></span>
+                </Link>
+              </CardTitle>
+              <p className="text-muted-foreground">
+                {format(new Date(post.date), "yyyy年MM月dd日")}
+              </p>
+            </CardHeader>
+            <CardContent>
+              <p
+                className={cn(
+                  post.jetpack_featured_media_url
+                    ? "line-clamp-3"
+                    : "line-clamp-6"
+                )}
+                dangerouslySetInnerHTML={{ __html: post.excerpt.rendered }}
+              ></p>
+              {post.jetpack_featured_media_url && (
+                <Image
+                  src={post.jetpack_featured_media_url}
+                  alt=""
+                  width={800}
+                  height={450}
+                  className="aspect-video object-cover object-center rounded-md mt-6 bg-muted"
+                />
+              )}
+            </CardContent>
+          </Card>
         ))}
-      </ul>
-    </div>
+      </div>
+    </>
   );
 }
